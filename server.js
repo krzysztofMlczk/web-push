@@ -75,7 +75,7 @@ app.post("/notify-me", async (request, response) => {
   console.log(`Notifying ${request.body.endpoint}`);
   const subscription = await subscriptions.get(request.body.endpoint);
   console.log(subscription);
-  sendNotifications([subscription]);
+  sendNotifications([subscription.props]);
   response.sendStatus(200);
 });
 
