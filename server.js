@@ -2,21 +2,17 @@ require("dotenv").config();
 const express = require("express");
 const webpush = require("web-push");
 const bodyparser = require("body-parser");
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("./data/db.json");
-const db = low(adapter);
+const db = require("cyclic-dynamodb");
+
 const vapidDetails = {
   publicKey: process.env.VAPID_PUBLIC_KEY,
   privateKey: process.env.VAPID_PRIVATE_KEY,
   subject: process.env.VAPID_SUBJECT,
 };
 
-db.defaults({
-  subscriptions: [],
-}).write();
+const subscriptions = db.collection("subscriptions");
 
-function sendNotifications(subscriptions) {
+function sendNotifications(subs) {
   // Create the notification content.
   const notification = JSON.stringify({
     title: "Hello, Notifications!",
@@ -31,8 +27,8 @@ function sendNotifications(subscriptions) {
     vapidDetails: vapidDetails,
   };
   // Send a push message to each client specified in the subscriptions array.
-  subscriptions.forEach((subscription) => {
-    const endpoint = subscription.endpoint;
+  subs.forEach((sub) => {
+    const endpoint = sub.endpoint;
     const id = endpoint.substr(endpoint.length - 8, endpoint.length);
     webpush
       .sendNotification(subscription, notification, options)
@@ -51,31 +47,39 @@ const app = express();
 app.use(bodyparser.json());
 app.use(express.static("public"));
 
-app.post("/add-subscription", (request, response) => {
+app.post("/add-subscription", async (request, response) => {
   console.log(`Subscribing ${request.body.endpoint}`);
-  db.get("subscriptions").push(request.body).write();
-  response.sendStatus(200);
+  try {
+    const newSub = await subscriptions.set(request.body.endpoint, request.body);
+    console.log(newSub);
+    response.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    response.sendStatus(500);
+  }
 });
 
-app.post("/remove-subscription", (request, response) => {
+app.post("/remove-subscription", async (request, response) => {
   console.log(`Unsubscribing ${request.body.endpoint}`);
-  db.get("subscriptions").remove({ endpoint: request.body.endpoint }).write();
-  response.sendStatus(200);
+  try {
+    await subscriptions.delete(request.body.endpoint);
+    response.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    response.sendStatus(500);
+  }
 });
 
-app.post("/notify-me", (request, response) => {
+app.post("/notify-me", async (request, response) => {
   console.log(`Notifying ${request.body.endpoint}`);
-  const subscription = db
-    .get("subscriptions")
-    .find({ endpoint: request.body.endpoint })
-    .value();
+  const subscription = await subscriptions.get(request.body.endpoint);
   sendNotifications([subscription]);
   response.sendStatus(200);
 });
 
-app.post("/notify-all", (request, response) => {
+app.post("/notify-all", async (request, response) => {
   console.log("Notifying all subscribers");
-  const subscriptions = db.get("subscriptions").cloneDeep().value();
+  const subs = await subscriptions.list();
   if (subscriptions.length > 0) {
     sendNotifications(subscriptions);
     response.sendStatus(200);
