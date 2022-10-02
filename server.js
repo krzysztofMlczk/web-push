@@ -79,6 +79,8 @@ app.post("/notify-all", async (request, response) => {
   console.log("Notifying all subscribers");
   const subs = await subscriptions.list();
   console.log(subs);
+  console.log(subs.results);
+  console.log(subs.results[0]);
   console.log(
     subs.results.map((sub) => {
       endpoint: sub.key;
