@@ -2,15 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const webpush = require("web-push");
 const bodyparser = require("body-parser");
-const db = require("cyclic-dynamodb");
+const CyclicDB = require("cyclic-dynamodb");
+const db = CyclicDB("subscriptions");
+const subscriptions = db.collection("subscriptions");
 
 const vapidDetails = {
   publicKey: process.env.VAPID_PUBLIC_KEY,
   privateKey: process.env.VAPID_PRIVATE_KEY,
   subject: process.env.VAPID_SUBJECT,
 };
-
-const subscriptions = db.collection("subscriptions");
 
 function sendNotifications(subs) {
   // Create the notification content.
