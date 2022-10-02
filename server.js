@@ -78,20 +78,12 @@ app.post("/notify-me", async (request, response) => {
 app.post("/notify-all", async (request, response) => {
   console.log("Notifying all subscribers");
   const subs = await subscriptions.list();
-  console.log(subs);
-  console.log(subs.results);
-  console.log(subs.results[0]);
-  console.table({ res0key: subs.results[0].key });
-  console.log(
-    subs.results.map((sub) => ({
-      endpoint: sub.key,
-    }))
-  );
+
   if (subs.results.length > 0) {
     sendNotifications(
-      subs.results.map((sub) => {
-        endpoint: sub.key;
-      })
+      subs.results.map((sub) => ({
+        endpoint: sub.key,
+      }))
     );
     response.sendStatus(200);
   } else {
