@@ -74,6 +74,7 @@ app.post("/remove-subscription", async (request, response) => {
 app.post("/notify-me", async (request, response) => {
   console.log(`Notifying ${request.body.endpoint}`);
   const subscription = await subscriptions.get(request.body.endpoint);
+  console.log(subscription);
   sendNotifications([subscription]);
   response.sendStatus(200);
 });
