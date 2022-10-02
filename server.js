@@ -83,9 +83,9 @@ app.post("/notify-all", async (request, response) => {
   console.log(subs.results[0]);
   console.table({ res0key: subs.results[0].key });
   console.log(
-    subs.results.map((sub) => {
-      endpoint: sub.key;
-    })
+    subs.results.map((sub) => ({
+      endpoint: sub.key,
+    }))
   );
   if (subs.results.length > 0) {
     sendNotifications(
