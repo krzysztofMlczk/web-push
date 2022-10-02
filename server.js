@@ -80,9 +80,10 @@ app.post("/notify-all", async (request, response) => {
   const subs = await subscriptions.list();
   console.log(subs);
   if (subs.length > 0) {
-    sendNotifications(subs.map((sub) => sub.props));
+    sendNotifications(subs.results.map((sub) => sub.props));
     response.sendStatus(200);
   } else {
+    console.log(err);
     response.sendStatus(409);
   }
 });
