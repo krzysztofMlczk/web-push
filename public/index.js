@@ -19,13 +19,13 @@ async function subscribeButtonHandler() {
   }
 
   const registration = await navigator.serviceWorker.getRegistration();
-  // const subscribed = await registration.pushManager.getSubscription();
-  // if (subscribed) {
-  //   console.info("User is already subscribed.");
-  //   notifyMeButton.disabled = false;
-  //   unsubscribeButton.disabled = false;
-  //   return;
-  // }
+  const subscribed = await registration.pushManager.getSubscription();
+  if (subscribed) {
+    console.info("User is already subscribed.");
+    notifyMeButton.disabled = false;
+    unsubscribeButton.disabled = false;
+    return;
+  }
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -113,7 +113,12 @@ document.getElementById("notify-all").addEventListener("click", async () => {
     method: "POST",
   });
   if (response.status === 409) {
-    document.getElementById("notification-status-message").textContent =
-      "There are no subscribed endpoints to send messages to, yet.";
+    Notification.requestPermission().then((perm) => {
+      if (perm === "granted") {
+        new Notification("Server returned an error", {
+          body: "There are no subscribed endpoints to send messages to, yet.",
+        });
+      }
+    });
   }
 });
