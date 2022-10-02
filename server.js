@@ -32,7 +32,7 @@ function sendNotifications(subs) {
     const endpoint = sub.endpoint;
     const id = endpoint.substr(endpoint.length - 8, endpoint.length);
     webpush
-      .sendNotification(subscription, notification, options)
+      .sendNotification(sub, notification, options)
       .then((result) => {
         console.log(`Endpoint ID: ${id}`);
         console.log(`Result: ${result.statusCode}`);
