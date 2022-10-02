@@ -19,13 +19,13 @@ async function subscribeButtonHandler() {
   }
 
   const registration = await navigator.serviceWorker.getRegistration();
-  const subscribed = await registration.pushManager.getSubscription();
-  if (subscribed) {
-    console.info("User is already subscribed.");
-    notifyMeButton.disabled = false;
-    unsubscribeButton.disabled = false;
-    return;
-  }
+  // const subscribed = await registration.pushManager.getSubscription();
+  // if (subscribed) {
+  //   console.info("User is already subscribed.");
+  //   notifyMeButton.disabled = false;
+  //   unsubscribeButton.disabled = false;
+  //   return;
+  // }
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY),
