@@ -78,6 +78,7 @@ app.post("/notify-me", async (request, response) => {
 app.post("/notify-all", async (request, response) => {
   console.log("Notifying all subscribers");
   const subs = await subscriptions.list();
+  console.log(subs?.results?.map((sub) => sub.props));
   if (subs.results.length > 0) {
     sendNotifications(subs.results.map((sub) => sub.props));
     response.sendStatus(200);
