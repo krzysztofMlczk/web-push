@@ -51,11 +51,9 @@ app.use(express.static("public"));
 app.post("/add-subscription", async (request, response) => {
   console.log(`Subscribing ${request.body.endpoint}`);
   try {
-    const newSub = await subscriptions.set(request.body.endpoint, request.body);
-    console.log(newSub);
+    await subscriptions.set(request.body.endpoint, request.body);
     response.sendStatus(200);
   } catch (err) {
-    console.log(err);
     response.sendStatus(500);
   }
 });
@@ -66,7 +64,6 @@ app.post("/remove-subscription", async (request, response) => {
     await subscriptions.delete(request.body.endpoint);
     response.sendStatus(200);
   } catch (err) {
-    console.log(err);
     response.sendStatus(500);
   }
 });
@@ -74,7 +71,6 @@ app.post("/remove-subscription", async (request, response) => {
 app.post("/notify-me", async (request, response) => {
   console.log(`Notifying ${request.body.endpoint}`);
   const subscription = await subscriptions.get(request.body.endpoint);
-  console.log(subscription);
   sendNotifications([subscription.props]);
   response.sendStatus(200);
 });
@@ -82,8 +78,9 @@ app.post("/notify-me", async (request, response) => {
 app.post("/notify-all", async (request, response) => {
   console.log("Notifying all subscribers");
   const subs = await subscriptions.list();
-  if (subscriptions.length > 0) {
-    sendNotifications(subscriptions);
+  console.log(subs);
+  if (subs.length > 0) {
+    sendNotifications(subs.map((sub) => sub.props));
     response.sendStatus(200);
   } else {
     response.sendStatus(409);
