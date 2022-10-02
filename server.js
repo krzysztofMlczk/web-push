@@ -2,8 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const webpush = require("web-push");
 const bodyparser = require("body-parser");
-const CyclicDB = require("cyclic-dynamodb");
-const db = CyclicDB("subscriptions");
+
+const CyclicDb = require("cyclic-dynamodb");
+const db = CyclicDb("pink-spotless-starfishCyclicDB");
 const subscriptions = db.collection("subscriptions");
 
 const vapidDetails = {
